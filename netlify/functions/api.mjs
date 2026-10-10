@@ -7,6 +7,7 @@ import { randomUUID, timingSafeEqual } from "node:crypto";
 import { listings, listingById } from "../../lib/listings.js";
 import * as fub from "../../lib/fub.js";
 import neighborhoods, { COMMUTES } from "../../data/neighborhoods.js";
+import featured from "../../data/featured.js";
 
 export const config = { path: "/api/*" };
 
@@ -136,7 +137,7 @@ function homesSummary(lead) {
 // ---------- routes ----------
 const routes = {
   "GET /api/config": () => appConfig(),
-  "GET /api/listings": () => ({ listings, neighborhoods, commutes: COMMUTES }),
+  "GET /api/listings": () => ({ listings, featured, neighborhoods, commutes: COMMUTES }),
 
   "POST /api/leads": async (req) => {
     const lead = createLead(await readJson(req));

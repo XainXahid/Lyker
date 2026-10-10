@@ -41,6 +41,10 @@
       </div>
     </section>
 
+    <section class="view" id="v-browse" hidden>
+      <div class="scroll" id="browse"></div>
+    </section>
+
     <section class="view" id="v-saved" hidden>
       <div class="scroll" id="saved"></div>
     </section>
@@ -87,6 +91,8 @@
   <nav>
     <button data-tab="discover" aria-current="page">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="3"/><path d="M2 7v10M22 7v10"/></svg>Discover</button>
+    <button data-tab="browse">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>Browse</button>
     <button data-tab="saved">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 20s-7-4.3-8.9-8.8C1.7 7.8 3.8 4.5 7.2 4.5c2 0 3.4 1 4.8 2.8 1.4-1.8 2.8-2.8 4.8-2.8 3.4 0 5.5 3.3 4.1 6.7C19 15.7 12 20 12 20z"/></svg>Saved<span class="badge" id="savedCount" hidden></span></button>
     <button data-tab="prefs">

@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { db } from "./lib/db.js";
 import { listings, listingById } from "./lib/listings.js";
 import neighborhoods, { COMMUTES } from "./data/neighborhoods.js";
+import featured from "./data/featured.js";
 import * as fub from "./lib/fub.js";
 import { flush, retryFailed } from "./lib/sync.js";
 
@@ -94,7 +95,7 @@ const routes = {
 
   // Sample set is small, so the client filters. With the live IDX feed this
   // becomes a filtered, paginated query.
-  "GET /api/listings": () => ({ listings, neighborhoods, commutes: COMMUTES }),
+  "GET /api/listings": () => ({ listings, featured, neighborhoods, commutes: COMMUTES }),
 
   "POST /api/leads": async (req) => {
     const b = await body(req);

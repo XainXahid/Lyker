@@ -12,7 +12,7 @@ const DEFAULT = {
   seen: [], liked: [], lead: null, askedSignup: false,
 };
 
-let L = [], byId = {}, HOODINFO = {}, COMMUTES = [], CFG = { agentName: "Your agent", brokerage: "" };
+let L = [], FEATURED = [], byId = {}, HOODINFO = {}, COMMUTES = [], CFG = { agentName: "Your agent", brokerage: "" };
 let S = load();
 if (S.loan) Object.assign(LOAN, S.loan);
 let history = [];
@@ -546,6 +546,65 @@ function renderAgent() {
     <p class="legal">Equal Housing Opportunity. Homes in the swipe deck are samples with stock photos. Live listings open on outside sites. Listing details are deemed reliable but not guaranteed. ${PAYMENT_DISCLAIMER}</p>`;
 }
 
+// ---------- browse (photo cards) ----------
+// Real listings from data/featured.js come first. Each one credits the listing
+// brokerage and HiCentral MLS and opens on Zain's Talk Realty site. Sample homes
+// follow, clearly labeled, and open their Lyker profile.
+const TALK_DETAIL = (id) => `https://zain.talkrealty.co/listing-detail/${encodeURIComponent(id)}?no_reg=1`;
+const IDX_DISCLAIMER = () => `Listing information is based on data from the Multiple Listing Service of HiCentral MLS, Ltd. and is deemed reliable but not guaranteed and should be independently verified. IDX information is provided exclusively for consumers' personal, non-commercial use and may not be used for any purpose other than to identify prospective properties consumers may be interested in purchasing or renting. Listings marked with a brokerage name other than Talk Realty are held by that brokerage. © ${THIS_YEAR} HiCentral MLS, Ltd.`;
+
+function factsLine(l) {
+  return [l.beds != null && (l.beds === 0 ? "Studio" : `<b>${l.beds}</b> bd`), l.baths && `<b>${l.baths}</b> ba`,
+    l.sqft && `<b>${Number(l.sqft).toLocaleString()}</b> sq ft`, l.type && esc(l.type)].filter(Boolean).map((x) => `<span>${x}</span>`).join("");
+}
+
+function realCard(l) {
+  const rent = l.mode === "rent";
+  const img = l.photo ? `<img src="${esc(l.photo)}" alt="" loading="lazy">` : art({ id: Number(l.talkId) % 97 || 1, type: l.type });
+  return `<a class="lcard" href="${TALK_DETAIL(l.talkId)}" target="_blank" rel="noopener" aria-label="${esc(`${rent ? "For rent" : "For sale"}: ${l.address}, ${fullMoney(l.price)}${rent ? " a month" : ""}. Opens on Talk Realty.`)}">
+    <div class="lphoto">${img}<span class="lstatus ${rent ? "rent" : "sale"}">${rent ? "For rent" : "For sale"}</span><span class="lsource">HiCentral MLS</span></div>
+    <div class="lbody">
+      <div class="lprice">${fullMoney(l.price)}${rent ? "<small>/mo</small>" : ""}</div>
+      <div class="lfacts">${factsLine(l)}</div>
+      <div class="laddr">${esc(l.address)}</div>
+      <div class="lhood">${esc([l.hood, l.city].filter(Boolean).join(", "))}</div>
+      <span class="lcta">View on Talk Realty ↗</span>
+      <div class="lcredit">Listing courtesy of ${esc(l.listOffice || "the listing brokerage")}. Source: HiCentral MLS, Ltd.${l.mls ? ` MLS# ${esc(l.mls)}` : ""}</div>
+    </div></a>`;
+}
+
+function sampleCard(l) {
+  const rent = l.mode === "rent";
+  return `<button type="button" class="lcard" data-open-browse="${l.id}" aria-label="${esc(`Sample ${l.type.toLowerCase()} on ${l.street}, ${fullMoney(l.price)}${rent ? " a month" : ""}`)}">
+    <div class="lphoto">${photo(l, 700)}<span class="lstatus ${rent ? "rent" : "sale"}">${rent ? "For rent" : "For sale"}</span><span class="lsource">Sample home</span></div>
+    <div class="lbody">
+      <div class="lprice">${fullMoney(l.price)}${rent ? "<small>/mo</small>" : ""}</div>
+      <div class="lfacts">${factsLine(l)}</div>
+      <div class="laddr">${esc(l.street)}</div>
+      <div class="lhood">${esc(l.hood)}, ${esc(l.city)}</div>
+      ${tenureTag(l) ? `<div class="tags">${tenureTag(l)}</div>` : ""}
+      <div class="lcredit">Sample listing with a stock photo, for trying out Lyker.</div>
+    </div></button>`;
+}
+
+function renderBrowse() {
+  const mode = S.prefs.mode;
+  const real = FEATURED.filter((l) => l.mode === mode && l.talkId);
+  const samples = L.filter((l) => l.mode === mode).sort((a, b) => score(b) - score(a));
+  $("#browse").innerHTML = `
+    <h1 class="title">${mode === "rent" ? "Rentals on O‘ahu" : "Homes for sale on O‘ahu"}</h1>
+    <p class="sub">Tap a home for photos and full details${real.length ? " on Talk Realty" : ""}.</p>
+    <div class="seg" id="browse-mode" style="margin-bottom:14px">
+      <button type="button" data-v="buy" aria-pressed="${mode === "buy"}">Buy</button>
+      <button type="button" data-v="rent" aria-pressed="${mode === "rent"}">Rent</button>
+    </div>
+    ${real.length ? `<div class="lgrid">${real.map(realCard).join("")}</div>` : ""}
+    <div class="live-box"><div><b>${real.length ? "See more properties" : "See real, current listings"}</b><p class="note">${mode === "rent" ? "Opens current O‘ahu rentals." : "Opens Zain's Talk Realty search, filtered to your preferences."}</p></div>
+      <a class="btn" href="${liveForPrefs()}" target="_blank" rel="noopener">${liveLabel()}</a></div>
+    ${samples.length ? `<h3 class="lhead">${real.length ? "Sample homes" : "Sample homes to try Lyker with"}</h3><div class="lgrid">${samples.map(sampleCard).join("")}</div>` : ""}
+    <p class="legal">${real.length ? IDX_DISCLAIMER() + " " : ""}Equal Housing Opportunity. Sample homes use stock photos and aren't for sale.</p>`;
+}
+
 // ---------- saved ----------
 function renderBadge() { const b = $("#savedCount"); b.textContent = S.liked.length; b.hidden = !S.liked.length; }
 function renderSaved() {
@@ -584,12 +643,13 @@ function prefsChanged() { save(); syncPrefs(); renderPrefs(); }
 // ---------- nav + events ----------
 function show(tab) {
   closeLayer();
-  for (const t of ["discover", "saved", "prefs", "agent"]) {
+  for (const t of ["discover", "browse", "saved", "prefs", "agent"]) {
     $("#v-" + t).hidden = t !== tab;
     const b = document.querySelector(`nav [data-tab="${t}"]`);
     t === tab ? b.setAttribute("aria-current", "page") : b.removeAttribute("aria-current");
   }
   if (tab === "discover") renderDeck();
+  if (tab === "browse") renderBrowse();
   if (tab === "saved") renderSaved();
   if (tab === "prefs") renderPrefs();
   if (tab === "agent") renderAgent();
@@ -617,6 +677,7 @@ document.addEventListener("click", (e) => {
     return;
   }
   if (d.open) return openSheet(+d.open, true);
+  if (d.openBrowse) return openSheet(+d.openBrowse, S.liked.some((x) => x.id === +d.openBrowse));
   if (d.unsave) {
     const id = +d.unsave;
     S.liked = S.liked.filter((x) => x.id !== id); save();
@@ -635,6 +696,7 @@ document.addEventListener("click", (e) => {
   }
   if (d.beds) { S.prefs.beds = +d.beds; return prefsChanged(); }
   if (d.k) { const a = S.prefs[d.k]; S.prefs[d.k] = a.includes(d.v) ? a.filter((x) => x !== d.v) : [...a, d.v]; return prefsChanged(); }
+  if (t.parentElement?.id === "browse-mode") { S.prefs.mode = d.v; save(); syncPrefs(); return renderBrowse(); }
   if (t.parentElement?.id === "mode") { S.prefs.mode = d.v; return prefsChanged(); }
   if (t.parentElement?.id === "tenure") { S.prefs.feeOnly = d.v === "fee"; return prefsChanged(); }
   if (t.id === "go") return show("discover");
@@ -674,7 +736,7 @@ document.addEventListener("keydown", (e) => {
   renderBadge();
   try {
     const [cfg, data] = await Promise.all([api("GET", "/api/config"), api("GET", "/api/listings")]);
-    CFG = cfg; L = data.listings; HOODINFO = data.neighborhoods || {}; COMMUTES = data.commutes || [];
+    CFG = cfg; L = data.listings; FEATURED = data.featured || []; HOODINFO = data.neighborhoods || {}; COMMUTES = data.commutes || [];
     byId = Object.fromEntries(L.map((l) => [l.id, l]));
   } catch (e) {
     $("#deck").innerHTML = `<div class="empty"><h2>Can't load homes</h2><p>${esc(e.message)}</p></div>`;

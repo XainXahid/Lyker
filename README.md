@@ -11,6 +11,11 @@ The buyer app (`/`)
 - A plain-English explainer on fee simple vs leasehold, plus a warning on leasehold homes about financing
 - Sign-up after the first like, with contact consent, so each match reaches you
 
+The Browse tab
+- Photo cards for real listings you add to `data/featured.js`. Each card shows the price, beds, baths, size and address, credits the listing brokerage and HiCentral MLS, and opens the listing on your Talk Realty site (`zain.talkrealty.co/listing-detail/{id}?no_reg=1`)
+- A "See more properties" button that opens your Talk Realty search, filtered to the buyer's preferences
+- The sample homes below, clearly labeled, so the tab is never empty
+
 The agent dashboard (`/agent`)
 - Every lead with their contact info, what they're looking for, and each home they liked or asked to see
 - Showing requests are highlighted and can be filtered
@@ -54,6 +59,14 @@ npx netlify-cli deploy --prod
 ```
 
 Then in Netlify, go to Site configuration, then Environment variables, and add `AGENT_NAME`, `BROKERAGE`, `AGENT_PASSCODE`, `FUB_API_KEY` and `PUBLIC_URL` (your Netlify address). Deploy again so they take effect.
+
+## Adding real listings to Browse
+
+Open `data/featured.js` and add one entry per listing, copying the details from its Talk Realty page. `talkId` is the number at the end of the listing link, for example `265598949` in `https://zain.talkrealty.co/listing-detail/265598949?no_reg=1`. Fill in `listOffice` with the listing brokerage, which the HiCentral rules require on every card. Push the change and Netlify redeploys.
+
+## Your agent details
+
+The "Your agent" tab always shows you: Zain Zahid, REALTOR® at Talk Realty, license RS-88903, (808) 468-3967, zain@talkrealty.co. These are the defaults in `lib/fub.js`. To change one, set `AGENT_NAME`, `AGENT_TITLE`, `BROKERAGE`, `AGENT_LICENSE`, `AGENT_PHONE`, `AGENT_EMAIL`, `AGENT_PHOTO_URL` or `AGENT_BIO` in Netlify's environment variables.
 
 ## Switching to the real MLS feed
 
