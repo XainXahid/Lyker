@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Lyker Leads</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/app.css">
+<style>
+  body{overflow:auto}
+  .wrap{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:16px 48px}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  .top .brand small{font-family:var(--body);font-size:14px;font-weight:600;color:var(--muted);letter-spacing:0;margin-left:8px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+  .kpi{background:var(--surface);border-radius:16px;padding:14px}
+  .kpi b{font-family:var(--display);font-size:30px;font-weight:800;display:block;line-height:1;font-variant-numeric:tabular-nums}
+  .kpi span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+  .fub{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;border-radius:99px;padding:5px 11px}
+  .fub.on{background:var(--lagoon-soft);color:var(--lagoon)} .fub.off{background:var(--gold-soft);color:var(--gold)}
+  .fub i{width:8px;height:8px;border-radius:50%;background:currentColor}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .lead{background:var(--surface);border-radius:18px;padding:16px;margin-bottom:12px;display:grid;gap:12px}
+  .lead.hot{box-shadow:inset 0 0 0 2px var(--gold)}
+  .lead-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .lead h2{font-family:var(--display);font-size:22px;margin:0;letter-spacing:-.01em}
+  .contact{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;margin-top:2px}
+  .contact span{user-select:all}
+  .meta{font-size:13px;color:var(--muted)}
+  .status{font-size:12px;font-weight:700;border-radius:99px;padding:3px 9px;white-space:nowrap;align-self:start}
+  .status.sent{background:var(--lagoon-soft);color:var(--lagoon)} .status.pending{background:var(--chip);color:var(--muted)} .status.failed{background:var(--pass-soft);color:var(--pass)}
+  .homes{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+  .home{display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:center;background:var(--raised);border-radius:12px;padding:8px}
+  .home .thumb{width:72px;height:56px}
+  .home .p{font-family:var(--display);font-weight:700;font-size:16px;font-variant-numeric:tabular-nums}
+  .home .a{font-size:12.5px;color:var(--muted)}
+  .msgs{display:grid;gap:8px}
+  .msg{background:var(--gold-soft);border-radius:12px;padding:10px 12px}
+  .msg p{margin:4px 0 0;white-space:pre-wrap}
+  .login{max-width:360px;margin:12vh auto 0;background:var(--surface);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:12px}
+  .login h1{font-family:var(--display);margin:0}
+</style>
+</head>
+<body>
+<div class="wrap" id="root"></div>
+<script src="/agent.js"></script>
+</body>
+</html>

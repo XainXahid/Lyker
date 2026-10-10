@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12807D">
+<title>Contact Zain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/app.css">
+<style>
+  body{overflow:auto}
+  .wrap{max-width:460px;margin:0 auto;padding-inline:16px;padding-block:18px 40px;display:flex;flex-direction:column;gap:16px}
+  .home{background:var(--lagoon-soft);border-radius:16px;padding:14px}
+  .home b{display:block;font-family:var(--display);font-size:18px}
+  .home span{font-size:14px;color:var(--muted)}
+  .reasons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .reasons label{display:flex;gap:8px;align-items:center;border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:10px;font-weight:600;font-size:14px;cursor:pointer}
+  .reasons input{accent-color:var(--lagoon);width:18px;height:18px;margin:0}
+  .reasons label:has(input:checked){border-color:var(--lagoon);background:var(--lagoon-soft)}
+  .done{text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center;padding-top:30px}
+  .done h1{font-family:var(--display);margin:0}
+  .agent{font-size:14px;color:var(--muted);text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap" id="root">
+  <div class="brand">lyker<span>.</span></div>
+  <div>
+    <h1 class="title">Hi, I'm Zain</h1>
+    <p class="sub" style="margin:0">Leave your info and I'll get back to you today. No pressure.</p>
+  </div>
+  <div class="home" id="home" hidden><span>You're asking about</span><b id="homeName"></b></div>
+
+  <form class="signup" id="hello" novalidate>
+    <fieldset style="margin:0"><legend>I'd like to</legend>
+      <div class="reasons">
+        <label><input type="checkbox" name="reason" value="Schedule a private showing">Schedule a showing</label>
+        <label><input type="checkbox" name="reason" value="Get more info on this home">Get more info</label>
+        <label><input type="checkbox" name="reason" value="See similar homes">See similar homes</label>
+        <label><input type="checkbox" name="reason" value="Talk about financing">Talk financing</label>
+      </div>
+    </fieldset>
+    <div class="two">
+      <label class="field">First name<input id="h-first" name="firstName" autocomplete="given-name" required></label>
+      <label class="field">Last name<input id="h-last" name="lastName" autocomplete="family-name"></label>
+    </div>
+    <label class="field">Mobile<input id="h-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel"></label>
+    <label class="field">Email<input id="h-email" name="email" type="email" autocomplete="email" inputmode="email"></label>
+    <label class="field">Anything else? (optional)<textarea id="h-msg" name="note" rows="3" maxlength="1500"></textarea></label>
+    <label class="consent"><input type="checkbox" id="h-consent" name="consent">
+      <span>I agree that Zain Zahid of Talk Realty may contact me by call, text or email about homes. Message and data rates may apply. Consent isn't required to buy.</span></label>
+    <p class="err" id="h-err" role="alert"></p>
+    <button class="btn" id="h-go">Send to Zain</button>
+  </form>
+  <p class="agent">Zain Zahid, REALTOR®, RS-88903, Talk Realty<br>(808) 468-3967, zain@talkrealty.co</p>
+  <p class="legal">Equal Housing Opportunity.</p>
+</div>
+<script>
+  const $ = (s) => document.querySelector(s);
+  // The sign's QR code passes the home, e.g. /hello.html?home=5333+Likini+St+%232504
+  const home = (new URLSearchParams(location.search).get("home") || "").slice(0, 120);
+  if (home) { $("#home").hidden = false; $("#homeName").textContent = home; }
+
+  $("#hello").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const f = e.target, err = $("#h-err");
+    const v = Object.fromEntries(new FormData(f));
+    const reasons = [...f.querySelectorAll("input[name=reason]:checked")].map((i) => i.value);
+    if (!v.firstName.trim()) return (err.textContent = "Add your first name.");
+    if (!v.phone.trim() && !v.email.trim()) return (err.textContent = "Add a mobile number or email so Zain can reach you.");
+    if (!$("#h-consent").checked) return (err.textContent = "Tick the box so Zain is allowed to contact you.");
+    err.textContent = ""; $("#h-go").disabled = true;
+    const message = [
+      home ? `Scanned the sign at ${home}.` : "Scanned a Zain Zahid sign.",
+      reasons.length ? `Wants to: ${reasons.join(", ").toLowerCase()}.` : "",
+      v.note.trim(),
+    ].filter(Boolean).join(" ");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ firstName: v.firstName, lastName: v.lastName, phone: v.phone, email: v.email, consent: true, message, prefs: { mode: "buy", source: "Showing sign" } }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Couldn't send. Please call or text (808) 468-3967.");
+      $("#root").innerHTML = `<div class="done"><div class="brand">lyker<span>.</span></div><h1>Mahalo, ${v.firstName.replace(/[<>&"]/g, "")}!</h1>
+        <p class="sub">Zain got your info and will reach out soon.</p>
+        <a class="btn" href="/">Swipe more homes on Lyker</a></div>`;
+    } catch (ex) {
+      err.textContent = ex.message; $("#h-go").disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

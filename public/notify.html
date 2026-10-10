@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="robots" content="noindex"><title>Lyker notifications</title></head>
+<body>
+<!-- Netlify reads this form at deploy time. The Lyker API posts a copy of each
+     sign-up, showing request and message here so Netlify can email it. -->
+<form name="lyker-notify" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input name="bot-field">
+  <input name="subject">
+  <input name="name">
+  <input name="email">
+  <input name="phone">
+  <input name="home">
+  <input name="message">
+  <input name="looking_for">
+</form>
+</body>
+</html>

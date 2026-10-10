@@ -1,0 +1,17 @@
+{
+  "name": "lyker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Swipe-to-match home search for O'ahu that sends every match to the agent as a Follow Up Boss lead.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.9"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --watch --env-file-if-exists=.env server.js"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^11.1.0"
+  }
+}

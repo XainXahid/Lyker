@@ -1,0 +1,16 @@
+node_modules/
+
+# secrets — never commit
+.env
+.env.*
+!.env.example
+
+# local database / runtime data
+data/db/
+
+# build & deploy output
+.netlify/
+dist/
+build/
+
+.DS_Store
