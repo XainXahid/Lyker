@@ -549,43 +549,45 @@ function renderAgent() {
 // ---------- browse (photo cards) ----------
 // Real listings from data/featured.js come first. Each one credits the listing
 // brokerage and HiCentral MLS and opens on Zain's Talk Realty site. Sample homes
-// follow, clearly labeled, and open their Lyker profile.
+// follow, clearly labeled, and open their Lyker profile. Cards never show the
+// listing agent, only the brokerage, so Zain is the only agent on Lyker.
 const TALK_DETAIL = (id) => `https://zain.talkrealty.co/listing-detail/${encodeURIComponent(id)}?no_reg=1`;
-const IDX_DISCLAIMER = () => `Listing information is based on data from the Multiple Listing Service of HiCentral MLS, Ltd. and is deemed reliable but not guaranteed and should be independently verified. IDX information is provided exclusively for consumers' personal, non-commercial use and may not be used for any purpose other than to identify prospective properties consumers may be interested in purchasing or renting. Listings marked with a brokerage name other than Talk Realty are held by that brokerage. © ${THIS_YEAR} HiCentral MLS, Ltd.`;
+// HiCentral's IDX wording, as shown on Zain's Talk Realty site.
+const IDX_DISCLAIMER = () => `IDX information is provided exclusively for consumers' personal, non-commercial use, and may not be used for any purpose other than to identify prospective properties consumers may be interested in purchasing. Data is deemed reliable but is not guaranteed accurate by the MLS. Based on information from the Multiple Listing Service of HiCentral MLS, Ltd. Copyright: ${THIS_YEAR} by HiCentral MLS, Ltd. Some of the active listings appearing on this site may be listed by other REALTORS®. If you are interested in those active listings, Talk Realty may represent you as the buyer's agent.`;
 
-function factsLine(l) {
-  return [l.beds != null && (l.beds === 0 ? "Studio" : `<b>${l.beds}</b> bd`), l.baths && `<b>${l.baths}</b> ba`,
-    l.sqft && `<b>${Number(l.sqft).toLocaleString()}</b> sq ft`, l.type && esc(l.type)].filter(Boolean).map((x) => `<span>${x}</span>`).join("");
-}
+const factsLine = (l) => [l.beds === 0 ? "Studio" : l.beds + " bd", l.baths + " ba", l.sqft && Number(l.sqft).toLocaleString() + " sf", l.type].filter(Boolean).join(" · ");
 
-function realCard(l) {
-  const rent = l.mode === "rent";
-  const img = l.photo ? `<img src="${esc(l.photo)}" alt="" loading="lazy">` : art({ id: Number(l.talkId) % 97 || 1, type: l.type });
-  return `<a class="lcard" href="${TALK_DETAIL(l.talkId)}" target="_blank" rel="noopener" aria-label="${esc(`${rent ? "For rent" : "For sale"}: ${l.address}, ${fullMoney(l.price)}${rent ? " a month" : ""}. Opens on Talk Realty.`)}">
-    <div class="lphoto">${img}<span class="lstatus ${rent ? "rent" : "sale"}">${rent ? "For rent" : "For sale"}</span><span class="lsource">HiCentral MLS</span></div>
+function lcard({ tag, attrs, img, rent, price, badge, address, facts, credit, cta }) {
+  return `<${tag} class="lcard" ${attrs}>
+    <div class="lphoto">${img}<span class="lstatus ${rent ? "rent" : "sale"}">${rent ? "For rent" : "For sale"}</span>
+      <div class="lprice">${fullMoney(price)}${rent ? "<small> /mo</small>" : ""}</div>${badge}</div>
     <div class="lbody">
-      <div class="lprice">${fullMoney(l.price)}${rent ? "<small>/mo</small>" : ""}</div>
-      <div class="lfacts">${factsLine(l)}</div>
-      <div class="laddr">${esc(l.address)}</div>
-      <div class="lhood">${esc([l.hood, l.city].filter(Boolean).join(", "))}</div>
-      <span class="lcta">View on Talk Realty ↗</span>
-      <div class="lcredit">Listing courtesy of ${esc(l.listOffice || "the listing brokerage")}. Source: HiCentral MLS, Ltd.${l.mls ? ` MLS# ${esc(l.mls)}` : ""}</div>
-    </div></a>`;
+      <div class="laddr">${address}</div>
+      <div class="lfacts">${facts}</div>
+      <div class="lfoot"><div class="lcredit">${credit}</div><span class="lcta">${cta}</span></div>
+    </div></${tag}>`;
 }
 
-function sampleCard(l) {
-  const rent = l.mode === "rent";
-  return `<button type="button" class="lcard" data-open-browse="${l.id}" aria-label="${esc(`Sample ${l.type.toLowerCase()} on ${l.street}, ${fullMoney(l.price)}${rent ? " a month" : ""}`)}">
-    <div class="lphoto">${photo(l, 700)}<span class="lstatus ${rent ? "rent" : "sale"}">${rent ? "For rent" : "For sale"}</span><span class="lsource">Sample home</span></div>
-    <div class="lbody">
-      <div class="lprice">${fullMoney(l.price)}${rent ? "<small>/mo</small>" : ""}</div>
-      <div class="lfacts">${factsLine(l)}</div>
-      <div class="laddr">${esc(l.street)}</div>
-      <div class="lhood">${esc(l.hood)}, ${esc(l.city)}</div>
-      ${tenureTag(l) ? `<div class="tags">${tenureTag(l)}</div>` : ""}
-      <div class="lcredit">Sample listing with a stock photo, for trying out Lyker.</div>
-    </div></button>`;
-}
+const realCard = (l) => {
+  const rent = l.mode === "rent", where = [l.address, [l.city, l.zip].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+  return lcard({
+    tag: "a", rent, price: l.price,
+    attrs: `href="${TALK_DETAIL(l.talkId)}" target="_blank" rel="noopener" aria-label="${esc(`${rent ? "For rent" : "For sale"}: ${where}, ${fullMoney(l.price)}${rent ? " a month" : ""}. Opens on Talk Realty.`)}"`,
+    img: l.photo ? `<img src="${esc(l.photo)}" alt="" loading="lazy">` : art({ id: Number(l.talkId) % 97 || 1, type: l.type }),
+    badge: `<img class="lmls" src="/hicentral-mls.png" alt="HiCentral MLS" width="98" height="32">`,
+    address: esc(where), facts: esc(factsLine(l)),
+    credit: `Courtesy of ${esc(l.listOffice || "the listing brokerage")}${l.mls ? `<br>MLS# ${esc(l.mls)}` : ""}`,
+    cta: "View ↗",
+  });
+};
+
+const sampleCard = (l) => lcard({
+  tag: "button", rent: l.mode === "rent", price: l.price,
+  attrs: `type="button" data-open-browse="${l.id}" aria-label="${esc(`Sample ${l.type.toLowerCase()} on ${l.street}, ${fullMoney(l.price)}${l.mode === "rent" ? " a month" : ""}`)}"`,
+  img: photo(l, 700), badge: `<span class="lsample">Sample home</span>`,
+  address: `${esc(l.street)}, ${esc(l.hood)}`, facts: esc(factsLine(l)) + (tenureTag(l) ? ` ${tenureTag(l)}` : ""),
+  credit: "Stock photo, for trying out Lyker", cta: "Details",
+});
 
 function renderBrowse() {
   const mode = S.prefs.mode;
