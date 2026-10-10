@@ -526,7 +526,7 @@ const GUIDES = [
 function renderAgent() {
   const initials = CFG.agentName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
   const role = [CFG.agentTitle, CFG.brokerage].filter(Boolean).join(" at ");
-  const bio = CFG.agentBio || `${CFG.agentName} helps buyers and renters find homes across O‘ahu, from Waikīkī condos to houses on the Windward side. Swipe on homes you like and ${agentFirst()} will follow up with answers and showings.`;
+  const bio = CFG.agentBio || `${agentFirst()} helps buyers and renters find homes across O‘ahu, from Waikīkī condos to houses on the Windward side. Swipe on homes you like and ${agentFirst()} will follow up with answers and showings.`;
   $("#agent").innerHTML = `
     <div class="agent-card">
       <div class="avatar">${CFG.agentPhoto ? `<img src="${esc(CFG.agentPhoto)}" alt="">` : esc(initials)}</div>
